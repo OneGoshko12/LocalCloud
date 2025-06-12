@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Gallery</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <button id="themeToggle" class="theme-toggle">🌙</button>
+    
+    <div class="container">
+        <h1>Media Gallery</h1>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class="flashes">
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        {% endwith %}
+        
+        <form action="/" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" accept="image/*,video/*">
+            <button type="submit">Upload</button>
+        </form>
+        
+        <div class="gallery">
+            {% for file in files %}
+            <div class="thumb {% if file.lower().endswith(('.mp4', '.webm', '.mov', '.avi')) %}video{% endif %}" data-src="{{ url_for('uploaded_file', filename=file) }}" data-filename="{{ file }}">
+                {% if file.lower().endswith(('.mp4', '.webm', '.mov', '.avi')) %}
+                    <video src="{{ url_for('uploaded_file', filename=file) }}" muted preload="metadata"></video>
+                {% else %}
+                    <img src="{{ url_for('uploaded_file', filename=file) }}" alt="">
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div id="preview">
+        <div id="mediaContainer"></div>
+        <div class="nav-arrows">
+            <div class="nav-arrow prev-btn">&lt;</div>
+            <div class="nav-arrow next-btn">&gt;</div>
+        </div>
+        <div class="preview-buttons">
+            <button class="action-btn" id="downloadBtn">Download</button>
+            <button class="action-btn" id="exitBtn">X</button>
+        </div>
+        <div class="media-info"></div>
+    </div>
+
+    <script>
+        // Theme toggle functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggle = document.getElementById('themeToggle');
+            const body = document.body;
+            
+            // Check for saved theme preference or default to 'dark'
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            body.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+            
+            themeToggle.addEventListener('click', function() {
+                const currentTheme = body.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                
+                body.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateThemeIcon(newTheme);
+            });
+            
+            function updateThemeIcon(theme) {
+                themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+            }
+
+            // Gallery functionality
+            const preview = document.getElementById('preview');
+            const mediaContainer = document.getElementById('mediaContainer');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const exitBtn = document.getElementById('exitBtn');
+            const prevBtn = document.querySelector('.prev-btn');
+            const nextBtn = document.querySelector('.next-btn');
+            const mediaInfo = document.querySelector('.media-info');
+            const thumbs = Array.from(document.querySelectorAll('.thumb'));
+            let currentIndex = 0;
+
+            // Add click event to all thumbnails
+            thumbs.forEach((thumb, index) => {
+                thumb.addEventListener('click', () => {
+                    currentIndex = index;
+                    showMedia(thumb.dataset.src, thumb.dataset.filename);
+                });
+            });
+
+            // Show media in preview
+            function showMedia(src, filename) {
+                // Clear previous content
+                mediaContainer.innerHTML = '';
+                
+                // Create appropriate element based on file type
+                const isVideo = isVideoFile(src);
+                const media = isVideo ? document.createElement('video') : document.createElement('img');
+                
+                // Set attributes
+                media.src = src;
+                if (isVideo) {
+                    media.controls = true;
+                    media.autoplay = true;
+                }
+                
+                // Add to container
+                mediaContainer.appendChild(media);
+                
+                // Hide file info
+                mediaInfo.style.display = 'none';
+                
+                // Apply zoom effect
+                setTimeout(() => {
+                    mediaContainer.style.transform = 'scale(1.02)';
+                }, 100);
+                
+                // Show preview
+                preview.classList.add('active');
+                
+                // Handle keyboard navigation
+                document.addEventListener('keydown', handleKeyPress);
+            }
+
+            // Handle keyboard navigation
+            function handleKeyPress(e) {
+                if (!preview.classList.contains('active')) return;
+                
+                switch (e.key) {
+                    case 'Escape':
+                        closePreview();
+                        break;
+                    case 'ArrowLeft':
+                        navigate(-1);
+                        break;
+                    case 'ArrowRight':
+                        navigate(1);
+                        break;
+                }
+            }
+
+            // Navigate through media
+            function navigate(direction) {
+                currentIndex = (currentIndex + direction + thumbs.length) % thumbs.length;
+                const thumb = thumbs[currentIndex];
+                showMedia(thumb.dataset.src, thumb.dataset.filename);
+            }
+
+            // Check if file is video
+            function isVideoFile(url) {
+                const extensions = ['.mp4', '.webm', '.mov', '.avi'];
+                return extensions.some(ext => url.toLowerCase().endsWith(ext));
+            }
+
+            // Close preview
+            function closePreview() {
+                mediaContainer.style.transform = 'scale(1)';
+                setTimeout(() => {
+                    preview.classList.remove('active');
+                }, 200);
+                document.removeEventListener('keydown', handleKeyPress);
+            }
+
+            // Download current media
+            function downloadMedia() {
+                if (currentIndex >= 0 && currentIndex < thumbs.length) {
+                    const thumb = thumbs[currentIndex];
+                    window.location.href = '/download/' + thumb.dataset.filename;
+                }
+            }
+
+            // Add zoom functionality
+            mediaContainer.addEventListener('mouseenter', () => {
+                if (preview.classList.contains('active')) {
+                    mediaContainer.style.transform = 'scale(1.05)';
+                }
+            });
+            
+            mediaContainer.addEventListener('mouseleave', () => {
+                if (preview.classList.contains('active')) {
+                    mediaContainer.style.transform = 'scale(1.02)';
+                }
+            });
+
+            // Event listeners for navigation
+            prevBtn.addEventListener('click', () => navigate(-1));
+            nextBtn.addEventListener('click', () => navigate(1));
+            exitBtn.addEventListener('click', closePreview);
+            downloadBtn.addEventListener('click', downloadMedia);
+            
+            // Close preview when clicking outside the media
+            preview.addEventListener('click', function(e) {
+                if (e.target === preview) {
+                    closePreview();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
