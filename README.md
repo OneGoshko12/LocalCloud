@@ -7,6 +7,6 @@ I wanted to transfer my images and videos between phones and PCs/laptops at home
 - Dark/light theme toggle  
 - Click thumbnails to preview, navigate, or download
 
-![Features](sceenshots/screenshot-2025-06-13-01.png)
-![Features](sceenshots/screenshot-2025-06-13-02.png)
-![Features](IMG_8361.png)
+![Features](screenshots/screenshot-2025-06-13-01.png)
+![Features](screenshots/screenshot-2025-06-13-02.png)
+![Features](screenshots/img-03.png)
