@@ -33,4 +33,4 @@ Ctrl + C
 
 ---
 
-> **Note:** Make sure you have activated your virtual environment before running the application. If you haven't set up the project yet, refer to the 'installation_guide.md' first.
+> **Note:** Make sure you have activated your virtual environment before running the application. If you haven't set up the project yet, refer to the `installation_guide.md` first.
