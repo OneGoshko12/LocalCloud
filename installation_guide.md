@@ -90,4 +90,4 @@ Ctrl + C
 ## ⚠️ WARNING
 
 I never tried setting up the Cloud server on Windows machine!
-So if you have some error check `windows-potential-error.md`, might help.
+So if you have some error check `windows-error.md`, might help.
