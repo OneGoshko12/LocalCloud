@@ -21,7 +21,9 @@ cd flask_upload_app
 ### 3. Start the Application
 
 ```bash
-python app.py
+uv run app.py
+#or
+uv run python app.py
 ```
 
 ### 4. Stop the Application
