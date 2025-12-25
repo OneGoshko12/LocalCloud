@@ -5,6 +5,7 @@
 - Python 3.7+ installed
 - Terminal access
 - Text editor 
+- uv (package manager) --> ( see Step 2, if you don't have it)
 
 **For Windows:**
 - VS Code, Notepad++, etc.
@@ -21,55 +22,46 @@ cd LocalCloud
 cd flask_upload_app
 ```
 
-## Step 2: Create Virtual Environment
-
-```bash
-python3 -m venv venv
-```
-
-> **Note:** If `python3` doesn't work, try `python` or `py` depending on your Python installation.
-
-## Step 3: Activate Virtual Environment
+## Step 2: Install uv ( if you don't already have it)
 
 ### Linux:
+Run this in your terminal (it's the official standalone installer for Linux):
 ```bash
-source venv/bin/activate
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
+This downloads and installs *uv* to ~/.local/bin/uv.
+It should automatically handle adding it to your PATH, but if you're using fish shell, you might need to restart your terminal (close and reopen) for it to take effect.
 
 ### Windows:
+Run this in your PowerShell or Command Prompt (cmd) - (it's the official standalone installer for Windows):
+```
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+This downloads and installs uv to %USERPROFILE%\.cargo\bin\.
+It should automatically handle adding it to your PATH, but you might need to restart your terminal (close and reopen) for it to take effect.
 
-**Option A - Command Prompt:**
-```cmd
-venv\Scripts\activate
+### Alternative methods:
+If you have Winget installed, run: 
+```
+winget install --id=astral-sh.uv -e
+```
+Or with Scoop: 
+```
+scoop install main/uv
 ```
 
-**Option B - PowerShell:**
-```powershell
-venv\Scripts\Activate.ps1
+## Step 3: Install dependencies
+
+```
+uv sync
 ```
 
-If PowerShell gives execution policy error:
-```powershell
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-```
-Run this first, then try activation again.
-
-### Successful activation indicators:
-Your prompt should show `(venv)` at the beginning.
-
-**Example:** `(venv) C:\Desktop\flask_upload_app>`
-
-## Step 4: Install Dependencies
+## Step 4: Run the Application
 
 ```bash
-pip install Flask
-pip install -r requirements.txt
-```
-
-## Step 5: Run the Application
-
-```bash
-python app.py
+uv run python app.py
+#or
+uv run app.py
 ```
 
 Visit `http://<your-localhost-IP>:1212`
@@ -80,7 +72,7 @@ You'll see output like:
 * Running on http://[your-local-ip]:1212
 ```
 
-## Step 6: Stop the Server
+## Step 5: Stop the Server
 
 When finished, in the terminal press:
 ```
